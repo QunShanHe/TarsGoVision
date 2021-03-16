@@ -62,7 +62,7 @@ int imageUpdatingThread()
 			frame.copyTo(src);
 			Mat show;
 			frame.copyTo(show);
-			imshow("frame", show);
+            //imshow("frame", show);
 			imageReadable = true;
 			GlobalCondCV.notify_one();
 		}

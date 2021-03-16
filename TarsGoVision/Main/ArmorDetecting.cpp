@@ -25,14 +25,14 @@ void armorDetectingThread()
     bool bRun = true;
 
     //Set armor detector prop
-    detector.loadSVM("General/123svm.xml");
+    detector.loadSVM("/home/mountain/Documents/Projects/tars-go-vision/TarsGoVision/General/123svm.xml");
 
     //Set angle solver prop
-    angleSolver.setCameraParam("General/camera_params.xml", 1);
+    angleSolver.setCameraParam("/home/mountain/Documents/Projects/tars-go-vision/TarsGoVision/General/camera_params.xml", 1);
     angleSolver.setArmorSize(SMALL_ARMOR,135,125);
     angleSolver.setArmorSize(BIG_ARMOR,230,127);
     angleSolver.setBulletSpeed(15000);
-    this_thread::sleep_for(chrono::milliseconds(100));
+    this_thread::sleep_for(chrono::milliseconds(1000));
 
     double t,t1;
     do
@@ -93,7 +93,7 @@ void armorDetectingThread()
         //		6.bool textArmors_ON,	  是否输出装甲板信息
         //		7.bool textScores_ON	  是否输出打击度信息
         //					   1  2  3  4  5  6  7
-        detector.showDebugInfo(1, 1, 1, 1, 0, 0, 0);
+        detector.showDebugInfo(0, 0, 0, 0, 0, 0, 0);
 
         if(detector.isFoundArmor())
         {

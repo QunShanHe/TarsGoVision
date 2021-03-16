@@ -9,10 +9,6 @@
 
 #include "General/General.h"
 
-using namespace cv;
-using namespace std;
-
-
 class AngleSolver
 {
 public:
@@ -47,7 +43,7 @@ public:
 	* @param points2d image points set with following order : left_up, right_up, left_down, right_down
 	* @param type target armor type
 	*/
-	void setTarget(vector<Point2f> contoursPoints, Point2f centerPoint, ArmorType type);
+	void setTarget(std::vector<cv::Point2f> contoursPoints, cv::Point2f centerPoint, ArmorType type);
 
 
 	/**
@@ -89,7 +85,7 @@ public:
 	* @param output x_pitch angle   the angle that pitch revolve   '下' down is minus-       '上' up is positive+ 
 	* @param output distance  unit is mm
 	*/
-	void getAngle(vector<Point2f> & contourPoints, Point2f centerPoint, ArmorType type, double & yaw, double & pitch, double & evaluateDistance);
+	void getAngle(std::vector<cv::Point2f> & contourPoints, cv::Point2f centerPoint, ArmorType type, double & yaw, double & pitch, double & evaluateDistance);
 
     /**
     * @brief show debug information
@@ -99,12 +95,12 @@ public:
 private:
 
 	//Camera params
-	Mat CAMERA_MATRIX;    //IntrinsicMatrix		  fx,fy,cx,cy
-	Mat DISTORTION_COEFF; //DistortionCoefficients k1,k2,p1,p2
+	cv::Mat CAMERA_MATRIX;		//IntrinsicMatrix		  fx,fy,cx,cy
+	cv::Mat DISTORTION_COEFF;	//DistortionCoefficients k1,k2,p1,p2
 
 	//Object points in world coordinate
-	vector<Point3f> SMALL_ARMOR_POINTS_3D;
-	vector<Point3f> BIG_ARMOR_POINTS_3D;
+	std::vector<cv::Point3f> SMALL_ARMOR_POINTS_3D;
+	std::vector<cv::Point3f> BIG_ARMOR_POINTS_3D;
 
 	//speed of bullet (compensation for gravity and air fru)
 	double BULLET_SPEED;
@@ -113,14 +109,14 @@ private:
 	double GUN_CAM_DISTANCE_Y;
 
 	//Targets
-	vector<Point2f> targetContour;
-	Point2f targetCenter;
+	std::vector<cv::Point2f> targetContour;
+	cv::Point2f targetCenter;
 	ArmorType targetType;
 
 	// calculated by solvePnP
 	//s[R|t]=s'  s->world coordinate;s`->camera coordinate
-	Mat rVec;    //rot rotation between camera and target center
-	Mat tVec;  //trans tanslation between camera and target center
+	cv::Mat rVec;		//rot rotation between camera and target center
+	cv::Mat tVec;		//trans tanslation between camera and target center
 
 	//Results
 	float y_yaw;

@@ -1,5 +1,8 @@
 #include "Armor.h"
 
+using namespace cv;
+using namespace std;
+
 ArmorParam armorParam = ArmorParam();
 
 ArmorDetector::ArmorDetector()

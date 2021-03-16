@@ -1,34 +1,36 @@
-#include"Armor/Armor.h"
-#include"GxCamera/GxCamera.h"
-#include"AngleSolver/AngleSolver.h"
-#include"General/General.h"
-#include<X11/Xlib.h>
+/*
+*	@Author: Qunshan He,mountain.he@qq.com
+*	@Date:	 2021.03.16
+*	@Brief:  multi-thread starts
+*/
 
-pthread_t thread1;
-pthread_t thread2;
+#include "AngleSolver/AngleSolver.h"
+#include "Armor/Armor.h"
+#include "General/General.h"
+#include "GxCamera/GxCamera.h"
+
+using namespace cv;
+using namespace std;
 
 // muti-threads control variables
-pthread_mutex_t Globalmutex;             // threads conflict due to image-updating
-pthread_cond_t GlobalCondCV;             // threads conflict due to image-updating
-bool imageReadable = false;              // threads conflict due to image-updating
-Mat src = Mat::zeros(600,800,CV_8UC3);   // Transfering buffer
+mutex   Globalmutex;                        // C++11 mutex
+condition_variable GlobalCondCV;            // C++11 condition variable
+bool    imageReadable = false;              // threads conflict due to image-updating
+Mat     src = Mat::zeros(480,640,CV_8UC3);  // Transfering buffer
 
 
 int main(int argc, char** argv)
 {
-    //For MutiTHread
-    XInitThreads();
-    //Init mutex
-    pthread_mutex_init(&Globalmutex,NULL);
-    //Init cond
-    pthread_cond_init(&GlobalCondCV,NULL);
-    //Create thread 1 -- image acquisition thread
-    pthread_create(&thread1,NULL,imageUpdatingThread,NULL);
-    //Create thread 2 -- armor Detection thread
-    pthread_create(&thread2,NULL,armorDetectingThread,NULL);
-    //Wait for children thread
-    pthread_join(thread1,NULL);
-    pthread_join(thread2,NULL);
-    pthread_mutex_destroy(&Globalmutex);
+    // camera image updating thread
+    thread(imageUpdatingThread).detach();
+    // armor detecting thread
+    thread(armorDetectingThread).detach();
+    // main thread
+    while (true)
+    {
+        char chKey = getchar();
+        if (chKey == 'Q' || chKey == 'q')
+            break;
+    }
     return 0;
 }

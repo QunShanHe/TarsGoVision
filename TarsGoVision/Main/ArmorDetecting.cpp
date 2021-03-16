@@ -1,67 +1,75 @@
-#include"General/General.h"
-#include"Armor/Armor.h"
-#include"AngleSolver/AngleSolver.h"
-#include"Serial/Serial.h"
-#include<unistd.h>
+/*
+*	@Author: Qunshan He,mountain.he@qq.com
+*	@Date:	 2021.03.16
+*	@Brief:  Armor Detecting Thread function
+*/
 
-//import armor detector
-ArmorDetector detector;
+#include "AngleSolver/AngleSolver.h"
+#include "Armor/Armor.h"
+#include "General/General.h"
 
-//import angle solver
-AngleSolver angleSolver;
+using namespace cv;
+using namespace std;
 
-int targetNum = 2;
-Color ENEMYCOLOR = BLUE;
-bool bRun = true;
-double fps;
-
-void* armorDetectingThread(void* PARAM)
+void armorDetectingThread()
 {
+    // import armor detector
+    ArmorDetector detector;
+
+    // import angle solver
+    AngleSolver angleSolver;
+
+    Color ENEMYCOLOR = BLUE;    // Enemy Color
+    int targetNum = 2;          // Target Number
+
+    bool bRun = true;
+
     //Set armor detector prop
-    detector.loadSVM("/home/mountain/Git/JLURoboVision/General/123svm.xml");
+    detector.loadSVM("General/123svm.xml");
 
     //Set angle solver prop
-    angleSolver.setCameraParam("/home/mountain/Git/JLURoboVision/General/camera_params.xml", 1);
+    angleSolver.setCameraParam("General/camera_params.xml", 1);
     angleSolver.setArmorSize(SMALL_ARMOR,135,125);
     angleSolver.setArmorSize(BIG_ARMOR,230,127);
     angleSolver.setBulletSpeed(15000);
-    usleep(1000000);
+    this_thread::sleep_for(chrono::milliseconds(100));
 
     double t,t1;
     do
     {
         // FPS
         t = getTickCount();
-
-        detector.setEnemyColor(ENEMYCOLOR); //here set enemy color
+        
+        // Here set enemy color
+        detector.setEnemyColor(ENEMYCOLOR);
 
         //consumer gets image
-        pthread_mutex_lock(&Globalmutex);
-        while (!imageReadable) {
-            pthread_cond_wait(&GlobalCondCV,&Globalmutex);
+        if (1) {
+            unique_lock<mutex> lck(Globalmutex);
+            while (!imageReadable) {
+                GlobalCondCV.wait(lck);
+            }
+            detector.setImg(src);
+            imageReadable = false;
         }
-        detector.setImg(src);
-        imageReadable = false;
-        pthread_mutex_unlock(&Globalmutex);
-
-
 
         //装甲板检测识别子核心集成函数
         detector.run(src);
 
         //给角度解算传目标装甲板值的实例
-        double yaw=0,pitch=0,distance=0;
+        double yaw = 0, pitch = 0, distance = 0;
         Point2f centerPoint;
         if(detector.isFoundArmor())
         {
             vector<Point2f> contourPoints;
             ArmorType type;
             detector.getTargetInfo(contourPoints, centerPoint, type);
-            angleSolver.getAngle(contourPoints,centerPoint,SMALL_ARMOR,yaw,pitch,distance);
+            angleSolver.getAngle(contourPoints, centerPoint, type, yaw, pitch, distance);
         }
 
         //串口在此获取信息 yaw pitch distance，同时设定目标装甲板数字
-        Serial(yaw,pitch,true,detector.isFoundArmor());
+        //Serial(yaw,pitch,true,detector.isFoundArmor());
+        
         //操作手用，实时设置目标装甲板数字
         detector.setTargetNum(targetNum);
 
@@ -69,7 +77,7 @@ void* armorDetectingThread(void* PARAM)
         t1=(getTickCount()-t)/getTickFrequency();
         printf("Armor Detecting FPS: %f\n",1/t1);
         if(detector.isFoundArmor()){
-            printf("Found Target! Center(%d,%d)\n",centerPoint.x,centerPoint.y);
+            printf("Found Target! Center(%f,%f)\n",centerPoint.x,centerPoint.y);
             cout<<"Yaw: "<<yaw<<"Pitch: "<<pitch<<"Distance: "<<distance<<endl;
         }
 

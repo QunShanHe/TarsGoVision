@@ -70,6 +70,8 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Scripts\VisualStudioProps\GalaxyCamera.props" />
+    <Import Project="..\..\..\Scripts\VisualStudioProps\OpenCV-3.4.10-Release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -80,9 +82,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>./;../;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>.../;./;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -149,7 +153,9 @@
     <ClCompile Include="Armor\LightBar.cpp" />
     <ClCompile Include="Armor\matchArmors.cpp" />
     <ClCompile Include="GxCamera\GxCamera.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Main\ArmorDetecting.cpp" />
+    <ClCompile Include="Main\ImageUpdating.cpp" />
+    <ClCompile Include="Main\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AngleSolver\AngleSolver.h" />

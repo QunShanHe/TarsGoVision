@@ -6,6 +6,9 @@
 
 #include"Armor.h"
 
+using namespace cv;
+using namespace std;
+
 void eraseErrorRepeatArmor(vector<ArmorBox> & armors);
 bool armorCompare(const ArmorBox & a_armor, const ArmorBox & b_armor, const ArmorBox & lastArmor, const int & targetNum);
 

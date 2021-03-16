@@ -1,5 +1,13 @@
+/*
+*	@Author: Mountain
+*	@Date:	 2020.04.20
+*	@Brief:  Defination of LightBar Class 
+*/
+
 #include "Armor.h"
 
+using namespace cv;
+using namespace std;
 
 LightBar::LightBar(){
 	lightRect = RotatedRect();

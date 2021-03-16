@@ -5,7 +5,8 @@
 */
 
 #include"Armor.h"
-
+using namespace cv;
+using namespace std;
 /**
 * @brief: find all the possible lights of armor  检测所有可能的灯条
 */

@@ -1,5 +1,8 @@
 #include "Armor.h"
 
+using namespace cv;
+using namespace std;
+
 /**
  *@brief: calculate the cross point of four points in order bl(below left),tl(top left),tr(top right),br(below right)
  */

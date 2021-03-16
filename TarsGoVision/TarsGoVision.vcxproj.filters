@@ -39,7 +39,13 @@
     <ClCompile Include="GxCamera\GxCamera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Main\ArmorDetecting.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Main\ImageUpdating.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Main\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

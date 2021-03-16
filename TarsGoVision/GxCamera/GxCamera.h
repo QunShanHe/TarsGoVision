@@ -8,7 +8,6 @@
 #include<vector>
 
 using namespace std;
-using namespace cv;
 
 //Show error message
 #define GX_VERIFY(emStatus) \
@@ -131,7 +130,7 @@ public:
 	* @param: 目标CvMat图像容器
 	* @return: 获取状态
 	*/
-	GX_STATUS snapCvMat(Mat & dstCvMat);
+	GX_STATUS snapCvMat(cv::Mat & dstCvMat);
 
 	/**
 	* @beief: 设置ROI参数
@@ -182,7 +181,7 @@ private:
 	bool			isColorCam_;	// 是否为彩色相机
 
 	GX_FRAME_DATA	gxFrame_;		// 大恒GxFrame
-	Mat				cvImage_;		// CvMat Image
+	cv::Mat			cvImage_;		// CvMat Image
 
 	/**
 	* @beief: 载入设置的ROI参数到相机中
@@ -232,7 +231,7 @@ private:
 	* @param: dstMat CvMat目标图像
 	* @return: void
 	*/
-	void cvtGxFrameToCvMat(GX_FRAME_DATA & srcFrame, Mat & dstMat);
+	void cvtGxFrameToCvMat(GX_FRAME_DATA & srcFrame, cv::Mat & dstMat);
 };
 
 #endif // !GXCAMERA_H

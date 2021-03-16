@@ -6,6 +6,10 @@
 
 #include"Armor.h"
 
+using namespace cv;
+using namespace ml;
+using namespace std;
+
 ArmorNumClassifier::ArmorNumClassifier(){
 	svm = ml::SVM::create();
 	armorImgSize = Size(40, 40);

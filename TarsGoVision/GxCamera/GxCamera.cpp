@@ -1,5 +1,8 @@
 #include "GxCamera.h"
 
+using namespace cv;
+using namespace std;
+
 GxCamera::GxCamera()
 {
 	camHandle_		= NULL;				// 相机句柄

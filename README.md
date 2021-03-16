@@ -6,7 +6,12 @@
 
 ---
 ## 介绍  
-本代码是吉林大学TARS-GO战队Robomaster2020赛季步兵装甲板识别算法（全平台兼容版本），包含并优化了本战队机器人视觉算法（JLURoboVision）的**相机驱动**、**装甲板识别**、**角度解算**三大主要模块。  
+本代码是吉林大学TARS-GO战队Robomaster2020赛季步兵装甲板识别算法（全平台兼容版本），包含并优化了本战队机器人视觉算法（JLURoboVision）的**相机驱动**、**装甲板识别**、**角度解算**三大主要模块。 
+
+--- 
+## 主要特性
+1. 大幅优化了大恒相机驱动GxCamera，增强了代码封装性及可移植性，重新组织了代码格式，增强可读性及拓展性。
+2. 更改了使用的多线程库，由pthread更改为c++11标准的Thread库，突破原先只能在linux系统下运行的限制，实现全平台运行。
 
 ---
 ## 目录
@@ -15,9 +20,8 @@
 * [3. 依赖环境](#3依赖环境)
 * [4. 整体框架](#4整体框架)
 * [5. 实现方案](#5实现方案)
-* [6. 通讯协议](#6通信协议)
-* [7. 配置与调试](#7配置与调试)
-* [8. 总结展望](#8总结展望)
+* [6. 配置与调试](#7配置与调试)
+* [7. 总结展望](#8总结展望)
 ---
 ## 1.功能介绍
 |模块     |功能     |
@@ -60,12 +64,6 @@
 <img src="https://gitee.com/qunshanhe/JLURoboVision/raw/master/Assets/RealtimeArmor.gif" width = "600" alt="图2.5 装甲板数字识别"/>
 </div> 
 
- 
-### 大风车能量机关识别  
-<div align=center>
-<img src="https://gitee.com/qunshanhe/JLURoboVision/raw/master/Assets/windmill.gif" width = "600" alt="图2.6 大风车识别演示"/>
-</div> 
- 
 ### 角度解算  
 角度解算方面使用了两种解算方法分距离挡位运行。第一档使用P4P算法，第二档使用小孔成像原理的PinHole算法。  
 此外还引入了相机-枪口的Y轴距离补偿及重力补偿。  
@@ -82,21 +80,21 @@
 ### 硬件设备
 |硬件|型号|参数|
 |---|---|---|
-|运算平台|Manifold2-G|Tx2|
-|相机|大恒相机MER-050|分辨率640*480 曝光值3000~5000|
+|运算平台|Jetson Nano/Intel NUC|B01|
+|相机|大恒相机MER-050-560U3C|分辨率640*480 自动曝光3000~5000μs|
 |镜头|M0814-MP2|焦距8mm 光圈值4|
 ### 软件设备
 |软件类型|型号|
 |---|---|
-|OS|Ubuntu 16.04/Ubuntu18.04|
-|IDE|Qt Creator-4.5.2|
-|Library|OpenCV-3.4.0|
+|OS|Ubuntu 18.04/Windows 10|
+|IDE|Qt Creator-4.5.2/Visual Studio 2019|
+|Library|OpenCV-3.4.10|
 |DRIVE|Galaxy SDK|
 ---
 ## 4.整体框架
 ### 文件树  
 ```
-JLURoboVision/
+TarsGoVision/
 ├── AngleSolver
 │   └── AngleSolver.h（角度解算模块头文件）
 │   ├── AngleSolver.cpp（角度解算模块源文件）
@@ -219,14 +217,51 @@ $$ \tan yaw = \frac{Y}{Z} = \frac{y_{screen} - c_y}{f_y} $$
 ---
 ## 7.配置与调试
 ### 运行平台搭建  
-1. Qt（及QtCreator）安装
-2. OpenCV库安装及配置
-3. 大恒相机驱动安装及配置
+1. Windows 10
 
-### 代码调试
-1. 使用QtCreator打开JLURoboVision.pro（或直接在根目录中make）
-2. 检查并修改camera_params.xml 及123svm.xml路径
-3. 编译运行
+2. Ubuntu 18
+
+### 代码调试TODO-List
+1. 修改对应的xml文件路径，如下YOUR_PATH_TO所指示，将该部分修改为本人电脑到该工程的绝对路径
+```
+// File: Main/ArmorDetecting.cpp
+
+//Set armor detector prop
+detector.loadSVM("YOUR_PATH_TO/TarsGoVision/General/123svm.xml");
+
+//Set angle solver prop
+angleSolver.setCameraParam("YOUR_PATH_TO/TarsGoVision/General/camera_params.xml", 1);
+```
+2. 修改相机SN号/索引号，如下YOUR_GALAXY_CAMERA_SN，将该部分修改为本人所使用大恒相机的SN号；或者将YOUR_GALAXY_CAMERA_INDEX修改为相机索引号。
+```
+// File: Main/ImageUpdating.cpp
+
+/*
+ *Second init: Open Camera by SN/Index
+*/
+status = gxCam.openDeviceBySN("YOUR_GALAXY_CAMERA_SN");			//By SN
+//status = gxCam.openDeviceByIndex("YOUR_GALAXY_CAMERA_INDEX");	//By Index
+GX_VERIFY(status);
+```
+3. 修改相机的ROI、曝光、增益、白平衡等参数
+```
+// File: Main/ImageUpdating.cpp
+
+/*
+ *Third init: Set Camera Params: ROI, Exposure, Gain, WhiteBalance
+*/
+gxCam.setRoiParam(640, 480, 80, 120);				// ROI
+gxCam.setExposureParam(2000, false, 1000, 3000);	// Exposure
+gxCam.setGainParam(0, false, 0, 10);				// Gain
+gxCam.setWhiteBalanceOn(true);						// WhiteBalance
+
+```
+
+4. Debugging Tools设置
+具体设置可参考[Debugging Tools](### Debugging Tools),设置文件为:
+```
+// File: Main/ArmorDetecting.cpp
+```
 
 ### 单独模块调试  
 可参考下列示例代码：  

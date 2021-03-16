@@ -216,10 +216,15 @@ $$ \tan yaw = \frac{Y}{Z} = \frac{y_{screen} - c_y}{f_y} $$
 
 ---
 ## 7.配置与调试
-### 运行平台搭建  
-1. Windows 10
-
+### 项目运行配置  
+1. Windows 10 
+	- 使用Visual Studio打开TarsGoVision.sln
+	- 配置项目属性表
+	- 链接OpenCV动态链接库 
 2. Ubuntu 18
+	- 使用Qt Creator打开TarsGoVision-qt.pro
+	- 配置pro文件
+	- pro文件中链接安装OpenCV时编译生成的.so链接库
 
 ### 代码调试TODO-List
 1. 修改对应的xml文件路径，如下YOUR_PATH_TO所指示，将该部分修改为本人电脑到该工程的绝对路径
@@ -258,7 +263,7 @@ gxCam.setWhiteBalanceOn(true);						// WhiteBalance
 ```
 
 4. Debugging Tools设置
-具体设置可参考[Debugging Tools](### Debugging Tools),设置文件为:
+具体设置可参考[Debugging Tools](### Debugging Tools)，设置文件为:
 ```
 // File: Main/ArmorDetecting.cpp
 ```

@@ -18,10 +18,10 @@
 * [1. 功能介绍](#1功能介绍)
 * [2. 效果展示](#2效果展示)
 * [3. 依赖环境](#3依赖环境)
-* [4. 整体框架](#4整体框架)
-* [5. 实现方案](#5实现方案)
-* [6. 配置与调试](#7配置与调试)
-* [7. 总结展望](#8总结展望)
+* [4. 配置与调试](#4配置与调试)
+* [5. 整体框架](#5整体框架)
+* [6. 实现方案](#6实现方案)
+* [7. 总结展望](#7总结展望)
 ---
 ## 1.功能介绍
 |模块     |功能     |
@@ -91,7 +91,93 @@
 |Library|OpenCV-3.4.10|
 |DRIVE|Galaxy SDK|
 ---
-## 4.整体框架
+## 4.配置与调试
+### 项目运行配置  
+1. Windows 10 
+	- 使用Visual Studio打开TarsGoVision.sln
+	- 配置项目属性表
+	- 链接OpenCV动态链接库 
+2. Ubuntu 18
+	- 使用Qt Creator打开TarsGoVision-qt.pro
+	- 配置pro文件
+	- pro文件中链接安装OpenCV时编译生成的.so链接库
+
+### 代码调试TODO-List
+1. 修改对应的xml文件路径，如下YOUR_PATH_TO所指示，将该部分修改为本人电脑到该工程的绝对路径
+```
+// File: Main/ArmorDetecting.cpp
+
+//Set armor detector prop
+detector.loadSVM("YOUR_PATH_TO/TarsGoVision/General/123svm.xml");
+
+//Set angle solver prop
+angleSolver.setCameraParam("YOUR_PATH_TO/TarsGoVision/General/camera_params.xml", 1);
+```
+2. 修改相机SN号/索引号，如下YOUR_GALAXY_CAMERA_SN，将该部分修改为本人所使用大恒相机的SN号；或者将YOUR_GALAXY_CAMERA_INDEX修改为相机索引号。
+```
+// File: Main/ImageUpdating.cpp
+
+/*
+ *Second init: Open Camera by SN/Index
+*/
+status = gxCam.openDeviceBySN("YOUR_GALAXY_CAMERA_SN");			//By SN
+//status = gxCam.openDeviceByIndex("YOUR_GALAXY_CAMERA_INDEX");	//By Index
+GX_VERIFY(status);
+```
+3. 修改相机的ROI、曝光、增益、白平衡等参数
+```
+// File: Main/ImageUpdating.cpp
+
+/*
+ *Third init: Set Camera Params: ROI, Exposure, Gain, WhiteBalance
+*/
+gxCam.setRoiParam(640, 480, 80, 120);				// ROI
+gxCam.setExposureParam(2000, false, 1000, 3000);	// Exposure
+gxCam.setGainParam(0, false, 0, 10);				// Gain
+gxCam.setWhiteBalanceOn(true);						// WhiteBalance
+
+```
+4. Debugging Tools设置
+具体设置可参考[Debugging Tools](### Debugging Tools)，设置文件为:
+```
+// File: Main/ArmorDetecting.cpp
+```
+### 单独模块调试  
+可参考下列示例代码：  
+[JLUVision_Demos](https://gitee.com/qunshanhe/JLUVision_Demos)各示例程序代码库  
+[Armor_Demo](https://gitee.com/qunshanhe/JLUVision_Demos/tree/master/Armor_Demo)为装甲板识别模块演示程序，可在Linux(.pro)/Windows(.sln)运行。  
+[AngleSolver_Armor_GxCamera](https://gitee.com/qunshanhe/JLUVision_Demos/tree/master/Anglesolver_Armor_GxCamera_Demo)为大恒相机采图+装甲板+角度解算演示程序，需要连接大恒相机在Linux下运行。  
+### Debugging Tools  
+代码还自定义了一套调试用的函数，将灯条、装甲板识别、角度解算等信息进行可视化输出，并可通过键盘控制部分识别参数，为代码的调试和优化带来便利。  
+```
+//装甲板检测识别调试参数是否输出
+//param:
+//		1.showSrcImg_ON,		  是否展示原图
+//		2.bool showSrcBinary_ON,  是否展示二值图
+//		3.bool showLights_ON,	  是否展示灯条图
+//		4.bool showArmors_ON,	  是否展示装甲板图
+//		5.bool textLights_ON,	  是否输出灯条信息
+//		6.bool textArmors_ON,	  是否输出装甲板信息
+//		7.bool textScores_ON	  是否输出打击度信息
+//					   1  2  3  4  5  6  7
+detector.showDebugInfo(0, 0, 0, 1, 0, 0, 0);
+```
+
+```
+//角度解算调试参数是否输出
+//param:
+//		1.showCurrentResult,	  是否展示当前解算结果
+//		2.bool showTVec,          是否展示目标坐标
+//		3.bool showP4P,           是否展示P4P算法计算结果
+//		4.bool showPinHole,       是否展示PinHole算法计算结果
+//		5.bool showCompensation,  是否输出补偿结果
+//		6.bool showCameraParams	  是否输出相机参数
+//					      1  2  3  4  5  6
+angleSolver.showDebugInfo(1, 1, 1, 1, 1, 0);
+```
+
+--- 
+## 5.整体框架
 ### 文件树  
 ```
 TarsGoVision/
@@ -128,7 +214,7 @@ TarsGoVision/
 </div>  
 
 ---
-## 5.实现方案  
+## 6.实现方案  
 ### 装甲板识别  
 装甲板识别使用基于检测目标特征的OpenCV传统方法，实现检测识别的中心思想是找出图像中所有敌方颜色灯条，并使用找出的灯条一一拟合并筛选装甲板。  
 主要步骤分为：**图像预处理**、**灯条检测**、**装甲板匹配**、**装甲板数字识别**及最终的**目标装甲板选择**。  
@@ -215,95 +301,7 @@ $$ \tan pitch = \frac{X}{Z} = \frac{x_{screen} - c_x}{f_x} $$
 $$ \tan yaw = \frac{Y}{Z} = \frac{y_{screen} - c_y}{f_y} $$
 
 ---
-## 7.配置与调试
-### 项目运行配置  
-1. Windows 10 
-	- 使用Visual Studio打开TarsGoVision.sln
-	- 配置项目属性表
-	- 链接OpenCV动态链接库 
-2. Ubuntu 18
-	- 使用Qt Creator打开TarsGoVision-qt.pro
-	- 配置pro文件
-	- pro文件中链接安装OpenCV时编译生成的.so链接库
-
-### 代码调试TODO-List
-1. 修改对应的xml文件路径，如下YOUR_PATH_TO所指示，将该部分修改为本人电脑到该工程的绝对路径
-```
-// File: Main/ArmorDetecting.cpp
-
-//Set armor detector prop
-detector.loadSVM("YOUR_PATH_TO/TarsGoVision/General/123svm.xml");
-
-//Set angle solver prop
-angleSolver.setCameraParam("YOUR_PATH_TO/TarsGoVision/General/camera_params.xml", 1);
-```
-2. 修改相机SN号/索引号，如下YOUR_GALAXY_CAMERA_SN，将该部分修改为本人所使用大恒相机的SN号；或者将YOUR_GALAXY_CAMERA_INDEX修改为相机索引号。
-```
-// File: Main/ImageUpdating.cpp
-
-/*
- *Second init: Open Camera by SN/Index
-*/
-status = gxCam.openDeviceBySN("YOUR_GALAXY_CAMERA_SN");			//By SN
-//status = gxCam.openDeviceByIndex("YOUR_GALAXY_CAMERA_INDEX");	//By Index
-GX_VERIFY(status);
-```
-3. 修改相机的ROI、曝光、增益、白平衡等参数
-```
-// File: Main/ImageUpdating.cpp
-
-/*
- *Third init: Set Camera Params: ROI, Exposure, Gain, WhiteBalance
-*/
-gxCam.setRoiParam(640, 480, 80, 120);				// ROI
-gxCam.setExposureParam(2000, false, 1000, 3000);	// Exposure
-gxCam.setGainParam(0, false, 0, 10);				// Gain
-gxCam.setWhiteBalanceOn(true);						// WhiteBalance
-
-```
-
-4. Debugging Tools设置
-具体设置可参考[Debugging Tools](### Debugging Tools)，设置文件为:
-```
-// File: Main/ArmorDetecting.cpp
-```
-
-### 单独模块调试  
-可参考下列示例代码：  
-[JLUVision_Demos](https://gitee.com/qunshanhe/JLUVision_Demos)各示例程序代码库  
-[Armor_Demo](https://gitee.com/qunshanhe/JLUVision_Demos/tree/master/Armor_Demo)为装甲板识别模块演示程序，可在Linux(.pro)/Windows(.sln)运行。  
-[AngleSolver_Armor_GxCamera](https://gitee.com/qunshanhe/JLUVision_Demos/tree/master/Anglesolver_Armor_GxCamera_Demo)为大恒相机采图+装甲板+角度解算演示程序，需要连接大恒相机在Linux下运行。  
-
-### Debugging Tools  
-代码还自定义了一套调试用的函数，将灯条、装甲板识别、角度解算等信息进行可视化输出，并可通过键盘控制部分识别参数，为代码的调试和优化带来便利。  
-```
-//装甲板检测识别调试参数是否输出
-//param:
-//		1.showSrcImg_ON,		  是否展示原图
-//		2.bool showSrcBinary_ON,  是否展示二值图
-//		3.bool showLights_ON,	  是否展示灯条图
-//		4.bool showArmors_ON,	  是否展示装甲板图
-//		5.bool textLights_ON,	  是否输出灯条信息
-//		6.bool textArmors_ON,	  是否输出装甲板信息
-//		7.bool textScores_ON	  是否输出打击度信息
-//					   1  2  3  4  5  6  7
-detector.showDebugInfo(0, 0, 0, 1, 0, 0, 0);
-```
-
-```
-//角度解算调试参数是否输出
-//param:
-//		1.showCurrentResult,	  是否展示当前解算结果
-//		2.bool showTVec,          是否展示目标坐标
-//		3.bool showP4P,           是否展示P4P算法计算结果
-//		4.bool showPinHole,       是否展示PinHole算法计算结果
-//		5.bool showCompensation,  是否输出补偿结果
-//		6.bool showCameraParams	  是否输出相机参数
-//					      1  2  3  4  5  6
-angleSolver.showDebugInfo(1, 1, 1, 1, 1, 0);
-```
----
-## 8.总结展望
+## 7.总结展望
 ### 总结  
 本套代码主要实现了装甲板识别及大风车的识别这两个模块，结合角度解算模块对识别到的目标信息的解算，获取云台枪口控制转角，随后通过串口传输给下位机。  
 装甲板识别与大风车识别模块性能表现不错，识别率和帧率满足比赛需求；角度解算模块经过设计，提升了准确性及鲁棒性。    
@@ -371,5 +369,5 @@ bool armorCompare(const ArmorBox & a_armor, const ArmorBox & b_armor, const Armo
 
 ### 展望  
 1. 卡尔曼滤波预测
-2. 深度学习识别
-3. 计算平台性能提升
+2. 计算平台性能提升
+3. 代码开机自启动
